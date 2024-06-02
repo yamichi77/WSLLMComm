@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "api"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+fastapi = "^0.111.0"
+uvicorn = "^0.30.0"
+debugpy = "^1.8.1"
+torch = {version = "^2.0.1+cu117", source = "torch_cu117"}
+torchvision = {version = "0.15.2", source = "torch_cu117"}
+torchaudio = {version = "2.0.2", source = "torch_cu117"}
+transformers = "^4.41.1"
+accelerate = "^0.30.1"
+bitsandbytes = "^0.43.1"
+packaging = "^24.0"
+ninja = "^1.11.1.1"
+
+
+[[tool.poetry.source]]
+name = "torch_cu117"
+url = "https://download.pytorch.org/whl/cu117"
+priority = "explicit"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

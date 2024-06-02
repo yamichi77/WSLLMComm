@@ -1,0 +1,27 @@
+.App {
+  text-align: center;
+}
+
+.logo {
+  margin-top: 40px;
+  margin-bottom: 80px;
+}
+
+.env-value {
+  font-weight: bold;
+  color: blue;
+}
+
+.container {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.count {
+  margin-right: 20px;
+}
+
+.env {
+  display: flex;
+  justify-content: center;
+} /*# sourceMappingURL=App.css.map */

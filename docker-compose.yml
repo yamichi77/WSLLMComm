@@ -1,0 +1,43 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    volumes:
+      - ./backend:/src
+      - HF_Cache:/HF_Cache
+
+    ports:
+      - 8000:8000
+      - 5678:5678
+    entrypoint: ["/src/start.sh", "--dev"]
+    environment:
+      - WATCHFILES_FORCE_POLLING=true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    stdin_open: true
+    tty: true
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: front
+    volumes:
+      - ./frontend:/usr/src/app
+    ports:
+      - "5173:5173"
+    environment:
+      - WATCHPACK_POLLING=true
+    command: sh -c "cd frontend && npm install && npm run dev"
+    stdin_open: true
+    tty: true
+
+volumes:
+  HF_Cache:
