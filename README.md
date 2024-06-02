@@ -3,6 +3,7 @@
 ## 概要
 
 LLM で生成したものを WebSocket 経由で React で受け取るアプリケーションになります。
+![generateImage](https://github.com/yamichi77/WSLLMComm/assets/136456737/0f500a1f-f52c-48ff-879d-bc5b58603f22)
 
 ## 使用方法
 
