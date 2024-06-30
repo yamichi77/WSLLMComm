@@ -14,6 +14,9 @@ export const IndexPage = () => {
   const [llmText, setLlmText] = useState<string>("");
   const [responseText, setResponseText] = useState<string>("");
   const responseTextRef = useRef<string>("");
+  const [responseTextTmp, setResponseTextTmp] = useState<string>("");
+  const [isAddingText, setIsAddingText] = useState(false);
+  const [isTextEnd, setIsTextEnd] = useState(false);
   const [llmTextList, setLlmList] = useState<LlmTextDto[]>([]);
   const [isSendButtonDisabled, setIsSendButtonDisabled] =
     useState<boolean>(false);
@@ -51,16 +54,35 @@ export const IndexPage = () => {
         responseTextRef.current = "";
         setResponseText("");
         setIsSendButtonDisabled(false);
+        setIsTextEnd(true);
         return;
       }
       responseTextRef.current += message;
-      setResponseText(responseTextRef.current);
+      setResponseTextTmp((prev) => prev + message);
     };
     setWs(ws);
     return () => {
       ws.close();
     };
   }, [getWs]);
+  useEffect(() => {
+    const addTextOneByOne = async (text: string) => {
+      if (isAddingText) return;
+      setResponseTextTmp("");
+      setIsAddingText(true);
+      for (const char of text) {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        setResponseText((prev) => prev + char);
+      }
+      setIsAddingText(false);
+      if (isTextEnd) {
+        setIsTextEnd(false);
+        setResponseText("");
+      }
+    };
+
+    addTextOneByOne(responseTextTmp);
+  }, [responseTextTmp, isAddingText, isTextEnd]);
   return (
     <Layout>
       <IndexPagePresenter
