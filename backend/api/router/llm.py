@@ -22,8 +22,14 @@ async def read_root(input: str):
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    while True:
-        data = await websocket.receive_text()
-        print("WebSocket Data: ", data)
-        await service.get_inference_result_as_ws(data, websocket)
-        print("WebSocket Success!")
+    try:
+        while True:
+            data = await websocket.receive_text()
+            print("WebSocket Data: ", data)
+            await service.get_inference_result_as_ws(data, websocket)
+            print("WebSocket Success!")
+    except WebSocketDisconnect:
+        print("WebSocket Disconnected")
+    finally:
+        if websocket.client_state == WebSocketState.CONNECTED:
+            await websocket.close()
