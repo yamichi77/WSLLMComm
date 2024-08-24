@@ -46,16 +46,18 @@ export const IndexPage = () => {
     ws.onmessage = (event) => {
       const contents = JSON.parse(event.data);
       switch (contents.type) {
-        case "END":
+        case "END": {
+          const responseText = responseTextRef.current;
           setLlmList((llmTextList) => [
             ...llmTextList,
-            { speaker: "bot", text: responseTextRef.current },
+            { speaker: "bot", text: responseText },
           ]);
           responseTextRef.current = "";
           setResponseText("");
           setIsSendButtonDisabled(false);
           setIsTextEnd(true);
           break;
+        }
         case "TEXT":
           if (responseTextRef.current == "") setResponseText("");
           responseTextRef.current += contents.msg;
