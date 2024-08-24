@@ -1,5 +1,7 @@
 from api.services.llm import LlmService
-from fastapi import APIRouter, HTTPException, WebSocket
+from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
+from fastapi.websockets import WebSocketState
 
 router = APIRouter()
 
@@ -15,6 +17,14 @@ async def read_root(input: str):
     global service
     if service is not None:
         return {"speaker": "bot", "text": service.get_inference_result_as_rest(input)}
+    else:
+        raise HTTPException(status_code=500, detail="Service not available")
+
+@router.post("/stream")
+async def read_stream(input: str):
+    global service
+    if service is not None:
+        return StreamingResponse(service.get_inference_result_as_sse(input), media_type="text/event-stream")
     else:
         raise HTTPException(status_code=500, detail="Service not available")
 

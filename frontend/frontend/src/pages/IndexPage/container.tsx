@@ -2,6 +2,7 @@ import { SelectChangeEvent } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { Layout } from "../../components/layout/container";
 import { useAPI } from "../../hooks/useAPI";
+import { useSSE } from "../../hooks/useSSE";
 import { useWebSocket } from "../../hooks/useWebSocket";
 import { LlmTextDto } from "../../types/LlmTextDto";
 import { IndexPagePresenter } from "./presenter";
@@ -9,6 +10,7 @@ import { IndexPagePresenter } from "./presenter";
 export const IndexPage = () => {
   const { getLlmPrompt } = useAPI();
   const { getWs } = useWebSocket();
+  const { getLlmPromptFromSSE } = useSSE();
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [sendType, setSendType] = useState<string>("WS");
   const [llmText, setLlmText] = useState<string>("");
@@ -34,8 +36,34 @@ export const IndexPage = () => {
       const reponse = await getLlmPrompt(llmText);
       setLlmList((llmTextList) => [...llmTextList, reponse]);
       setIsSendButtonDisabled(false);
-    } else if (ws && ws.readyState === WebSocket.OPEN) {
+    } else if (sendType === "WS" && ws && ws.readyState === WebSocket.OPEN) {
       ws?.send(llmText);
+    } else if (sendType === "SSE") {
+      getLlmPromptFromSSE(llmText, handleSSEResponse);
+    }
+  };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSSEResponse = (msg: any) => {
+    switch (msg.type) {
+      case "END":
+        setLlmList((llmTextList) => [
+          ...llmTextList,
+          { speaker: "bot", text: responseTextRef.current },
+        ]);
+        responseTextRef.current = "";
+        setResponseText("");
+        setIsSendButtonDisabled(false);
+        setIsTextEnd(true);
+        break;
+      case "TEXT":
+        if (responseTextRef.current == "") setResponseText("");
+        responseTextRef.current += msg.msg;
+        setResponseTextTmp((prev) => prev + msg.msg);
+        break;
+      case "LOAD":
+      case "PARAM":
+        setResponseText(msg.msg);
+        break;
     }
   };
   const handleSendType = (e: SelectChangeEvent) => {

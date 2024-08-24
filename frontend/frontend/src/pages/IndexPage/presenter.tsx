@@ -44,6 +44,7 @@ export const IndexPagePresenter = ({
       <Select value={selectSendType} onChange={onChangeSendType}>
         <MenuItem value={"REST"}>REST</MenuItem>
         <MenuItem value={"WS"}>WebSocket</MenuItem>
+        <MenuItem value={"SSE"}>SSE</MenuItem>
       </Select>
     </Box>
   );

@@ -75,7 +75,28 @@ class LlmService:
             else:
                 type = "TEXT"
                 msg = text.split("\n")
+            if len(msg) <= 1 and msg[0] == "":
+                continue
             contents = json.dumps({"type": type, "msg": msg}, ensure_ascii=False)
             await ws.send_text(contents)
             await asyncio.sleep(0)
         await ws.send_text(json.dumps({"type": "END", "msg": ""}, ensure_ascii=False))
+
+    async def get_inference_result_as_sse(self, input: str):
+        streamer = self.get_inference_result(input)
+        for text in streamer:
+            if text == "<|LOAD|>":
+                type = "LOAD"
+                msg = "モデルをロード中です。"
+            elif text == "<|PARAM|>":
+                type = "PARAM"
+                msg = "パラメータを設定中です。"
+            else:
+                type = "TEXT"
+                msg = text.split("\n")
+            if len(msg) <= 1 and msg[0] == "":
+                continue
+            contents = json.dumps({"type": type, "msg": msg}, ensure_ascii=False)
+            yield f"data: {contents}\n\n"
+            await asyncio.sleep(0)
+        yield f"data: {json.dumps({'type': 'END', 'msg': ''}, ensure_ascii=False)}\n\n"
