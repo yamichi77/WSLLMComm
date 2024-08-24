@@ -44,21 +44,28 @@ export const IndexPage = () => {
   useEffect(() => {
     const ws = getWs();
     ws.onmessage = (event) => {
-      const message = event.data;
-      if (message === "<|ENDTEXT|>") {
-        const text = responseTextRef.current;
-        setLlmList((llmTextList) => [
-          ...llmTextList,
-          { speaker: "bot", text: text },
-        ]);
-        responseTextRef.current = "";
-        setResponseText("");
-        setIsSendButtonDisabled(false);
-        setIsTextEnd(true);
-        return;
+      const contents = JSON.parse(event.data);
+      switch (contents.type) {
+        case "END":
+          setLlmList((llmTextList) => [
+            ...llmTextList,
+            { speaker: "bot", text: responseTextRef.current },
+          ]);
+          responseTextRef.current = "";
+          setResponseText("");
+          setIsSendButtonDisabled(false);
+          setIsTextEnd(true);
+          break;
+        case "TEXT":
+          if (responseTextRef.current == "") setResponseText("");
+          responseTextRef.current += contents.msg;
+          setResponseTextTmp((prev) => prev + contents.msg);
+          break;
+        case "LOAD":
+        case "PARAM":
+          setResponseText(contents.msg);
+          break;
       }
-      responseTextRef.current += message;
-      setResponseTextTmp((prev) => prev + message);
     };
     setWs(ws);
     return () => {
